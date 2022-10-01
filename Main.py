@@ -1,27 +1,60 @@
-import sys
+from PyQt6 import QtWidgets, uic
+from PyQt6.QtGui import QImage, QPixmap
+import WikiHandler
+import requests
 
-from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
-
-
-# Subclass QMainWindow to customize your application's main window
-class MainWindow(QMainWindow):
+class MainWindowUI(QtWidgets.QMainWindow):
     def __init__(self):
-        super().__init__()
+        super(MainWindowUI, self).__init__()
+        uic.loadUi("MainWindow.ui", self)
+        self.pushButton.clicked.connect(self.print_button_pressed)
 
-        self.setWindowTitle("My App")
-
-        button = QPushButton("Press Me!")
-
-        self.setFixedSize(QSize(400, 300))
-
-        # Set the central widget of the Window.
-        self.setCentralWidget(button)
+    def print_button_pressed(self):
+        source_widget = SourceUI("Franklin")
+        self.verticalLayout.addWidget(source_widget)
 
 
-app = QApplication(sys.argv)
 
-window = MainWindow()
-window.show()
+class SourceUI(QtWidgets.QWidget):
+    def __init__(self, term, language='en'):
+        super(SourceUI, self).__init__()
+        uic.loadUi("SourceEntry.ui", self)
 
-app.exec()
+        page, image_source = WikiHandler.get_first_wiki(term, language)
+
+        # Set Image if available
+        if len(image_source) > 0:
+            image = QImage()
+            image.loadFromData(requests.get(image_source).content)
+
+            pixmap = QPixmap(image)
+
+            pixmap = pixmap.scaledToHeight(64) # this value will need to coordinate with the ui file
+
+            self.label.setText("")
+            self.label.setPixmap(pixmap)
+            print("attempted to set picture")
+
+
+        # Set text in the text browser to the summary of the article (for now)
+        self.textBrowser.setText(page.summary)
+
+
+        # Set up the slot for signal/slot for the deleting push button
+        #self.pushButton
+
+
+
+
+def main():
+    # Set up asynchronous processes here
+
+    app = QtWidgets.QApplication([])
+    window = MainWindowUI()
+    window.show()
+    app.exec()
+
+
+if __name__ == "__main__":
+    main()
+
