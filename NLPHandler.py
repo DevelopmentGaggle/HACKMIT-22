@@ -6,8 +6,6 @@ import time
 import speech_recognition as sr
 
 #spacy.cli.download("en_core_web_sm")
-audioSampleQueue = queue.Queue()
-textSampleQueue = queue.Queue()
 
 def sample_from_mic(micSampleLength, audioSampleQueue, textSampleQueue):
     r = sr.Recognizer()
@@ -33,7 +31,7 @@ def audio_to_text(r, audioSampleQueue, textSampleQueue):
         print("Got nothing for you chief")
 
 
-def extract_proper_nouns(doc):
+def extract_proper_nouns(doc, usedWords):
     pos = [tok.i for tok in doc if tok.pos_ == "PROPN"]
     consecutives = []
     current = []
@@ -44,11 +42,23 @@ def extract_proper_nouns(doc):
             if current[-1] == elt - 1:
                 current.append(elt)
             else:
-                consecutives.append(current)
+                print(current)
+                if (' '.join([i.text for i in doc[current[0]:current[-1]+1]])) not in usedWords:
+                    consecutives.append(current)
+                    print(usedWords)
+                    usedWords.append(' '.join([i.text for i in doc[current[0]:current[-1]+1]]))
                 current = [elt]
     if len(current) != 0:
-        consecutives.append(current)
+        if (' '.join([i.text for i in doc[current[0]:current[-1] + 1]])) not in usedWords:
+            consecutives.append(current)
+            print(usedWords)
+            usedWords.append(' '.join([i.text for i in doc[current[0]:current[-1] + 1]]))
     return [doc[consecutive[0]:consecutive[-1] + 1] for consecutive in consecutives]
+
+
+audioSampleQueue = queue.Queue()
+textSampleQueue = queue.Queue()
+usedWords = []
 
 
 micSampleLength = 10
@@ -76,6 +86,6 @@ while 1:
     #for tok in doc:
     #    print(tok, tok.pos_)
 
-    dog = extract_proper_nouns(doc)
+    dog = extract_proper_nouns(doc, usedWords)
     print(dog)
 
