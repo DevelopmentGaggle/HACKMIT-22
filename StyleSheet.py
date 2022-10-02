@@ -5,9 +5,25 @@ QPushButton {
     font-weight: bold;
 }
 
-QFrame:frame_line {
-    background-color: #eeeeee;
-    border: 1px solid white;
+QFrame#frame_line {
+    background-color: #eeedfa;
+    border-color: #eeedfa;
+    border: 10px;
+    border-radius: 10px;
+}
+
+QLabel#Title {
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #81a8fc;
+    border-color: #81a8fc;
+    border: 10px;
+    border-radius: 10px;
+}
+
+QTextBrowser#textBrowser {
+    background-color: #eeedfa;
+    border-color: #eeedfa;
 }
 
 QAbstractScrollArea {
@@ -24,13 +40,13 @@ QWidget#scrollAreaWidgetContents {
     border: 1px solid white;
 }
 QPushButton#stopButton {
-    background-color: #f44336;
+    background-color: #f45880;
 }
 #stopButton:hover {
-    background-color: #e57373;
+    background-color: #e58078;
 }
 #stopButton:pressed { 
-    background-color: #ffcdd2;
+    background-color: #ffd0d8;
 }
 #runButton {
     background-color: #4caf50;
