@@ -22,10 +22,17 @@ def get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys, language="en"):
         if len(article_list) == 0:
             article_list = wikipedia.suggest(term)
 
+        if len(article_list) == 0:
+            return
+
         wiki_page = find_best_match(article_list[0], usedKeys)
-        imageLinks = bing_image_urls(wiki_page.title, limit=1)
+        try:
+            imageLinks = bing_image_urls(wiki_page.title, limit=1)
+        except:
+            imageLinks = []
+
         if len(imageLinks) > 0:
-            page_image = bing_image_urls(wiki_page.title, limit=1)[0]
+            page_image = imageLinks[0]
         else:
             page_image = ""
 

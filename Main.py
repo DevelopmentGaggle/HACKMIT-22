@@ -27,7 +27,7 @@ class MainWindowUI(QtWidgets.QMainWindow):
     def print_button_pressed(self):
         while not self.wiki_queue.empty():
             source_widget = SourceUI(self.wiki_queue.get())
-            self.verticalLayout.addWidget(source_widget)
+            self.verticalLayout.insertWidget(0, source_widget)
 
 
 class SourceUI(QtWidgets.QWidget):
