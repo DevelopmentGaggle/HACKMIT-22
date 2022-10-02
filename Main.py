@@ -33,7 +33,7 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.verticalLayout.addStretch()
 
         self.canvas1 = plotwidget.MplCanvas(self, width=5, height=5, dpi=100)
-        self.canvas1.setMinimumWidth(325)
+        self.canvas1.setMinimumWidth(375)
         self.canvas1.setMinimumHeight(200)
         self.canvas2 = plotwidget.MplCanvasSpaghetti(self, width=5, height=5, dpi=100)
         self.canvas2.setMinimumWidth(325)
@@ -42,8 +42,6 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.verticalLayout_2.addWidget(self.canvas1)
         self.verticalLayout_2.addWidget(self.canvas2)
         self.verticalLayout_2.addStretch()
-
-
 
         # Setup a timer to trigger the redraw by calling update_plot.
         self.timer = QTimer()
@@ -61,9 +59,8 @@ class MainWindowUI(QtWidgets.QMainWindow):
             print(important_words)
 
             if len(self.ydata) + 1 > self.total:
-                # TODO PLEASE WORK
                 self.ydata = self.ydata[1:] + [important_words / total_words]
-                self.xdata = [self.xdata[self.total-1]] + self.xdata[1:]
+                print(self.xdata)
             else:
                 self.ydata = self.ydata + [important_words / total_words]
                 self.xdata = self.xdata + [len(self.ydata)]
