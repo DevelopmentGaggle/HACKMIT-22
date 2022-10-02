@@ -13,12 +13,19 @@ from PyQt6.QtCore import Qt, QTimer
 
 
 class MainWindowUI(QtWidgets.QMainWindow):
-    def __init__(self, wiki_queue):
+    def __init__(self, wiki_queue, metrics_queue_1):
         super(MainWindowUI, self).__init__()
         uic.loadUi("MainWindow.ui", self)
+        self.setWindowTitle("Application Name")
+
+        self.total = 50
+        self.ydata = []
+        self.xdata = []
 
         self.wiki_queue = wiki_queue
+        self.metrics_queue_1 = metrics_queue_1
 
+        # Add graph widgets to the left and a spacer to the right
         self.verticalLayout.addStretch()
 
         self.canvas1 = plotwidget.MplCanvas(self, width=5, height=5, dpi=100)
@@ -32,14 +39,6 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.verticalLayout_2.addWidget(self.canvas2)
         self.verticalLayout_2.addStretch()
 
-
-        n_data = 50
-        self.xdata = list(range(n_data))
-        self.ydata = [random.randint(0, 10) for i in range(n_data)]
-        self.update_plot()
-
-        self.show()
-
         # Setup a timer to trigger the redraw by calling update_plot.
         self.timer = QTimer()
         self.timer.setInterval(100)
@@ -47,20 +46,31 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.timer.start()
 
     def update_plot(self):
-        # Drop off the first y element, append a new one.
-        self.ydata = self.ydata[1:] + [random.randint(0, 10)]
+        # Grab new data
+        if self.metrics_queue_1.empty():
+            return
+
+        total_words, important_words = self.metrics_queue_1.get()
+
+        print(total_words)
+        print(important_words)
+
+        if len(self.ydata) + 1 > self.total:
+            self.ydata = self.ydata[1:] + [important_words / total_words]
+            self.xdata = self.xdata[1:] + self.xdata[self.total-1]
+        else:
+            self.ydata = self.ydata + [important_words / total_words]
+            self.xdata = self.xdata + [len(self.ydata)]
+
         self.canvas1.axes.cla()  # Clear the canvas.
         self.canvas1.axes.plot(self.xdata, self.ydata, 'r')
         # Trigger the canvas to update and redraw.
         self.canvas1.draw()
-        self.canvas2.axes.cla()  # Clear the canvas.
-        self.canvas2.axes.plot(self.xdata, self.ydata, 'r')
-        # Trigger the canvas to update and redraw.
-        self.canvas2.draw()
 
     def print_button_pressed(self):
         while not self.wiki_queue.empty():
             source_widget = SourceUI(self.wiki_queue.get())
+            source_widget.setStyleSheet()
             self.verticalLayout.insertWidget(0, source_widget)
 
 
@@ -69,7 +79,9 @@ class SourceUI(QtWidgets.QWidget):
         super(SourceUI, self).__init__()
         uic.loadUi("SourceEntry.ui", self)
 
-        self.setFixedHeight(150)
+        height = 90
+
+        self.setFixedHeight(height)
 
         page, image_source = pair
 
@@ -81,11 +93,10 @@ class SourceUI(QtWidgets.QWidget):
             pixmap = QPixmap(image)
 
             # this value will need to coordinate with the ui file
-            pixmap = pixmap.scaledToHeight(64, mode=Qt.TransformationMode.SmoothTransformation)
+            pixmap = pixmap.scaledToHeight(height, mode=Qt.TransformationMode.SmoothTransformation)
 
             self.label.setText("")
             self.label.setPixmap(pixmap)
-            print("attempted to set picture")
 
         # Set text in the text browser to the summary of the article (for now)
         self.textBrowser.setText(page.summary)
@@ -104,18 +115,15 @@ def main():
     app.setStyleSheet(StyleSheet.StyleSheet)
 
     wiki_queue = queue.Queue()
+    metrics_queue_1 = queue.Queue()
 
-    window = MainWindowUI(wiki_queue)
-    thread = NLPHandler.AThread(wiki_queue)
+    window = MainWindowUI(wiki_queue, metrics_queue_1)
+    thread = NLPHandler.AThread(wiki_queue, metrics_queue_1)
 
     thread.add_source.connect(window.print_button_pressed)
     thread.start()
 
-    print("Did we get here???")
     window.show()
-
-    #window.custom_signal.add_source.emit()
-
     app.exec()
 
 

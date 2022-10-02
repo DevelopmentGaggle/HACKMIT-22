@@ -11,14 +11,14 @@ from PyQt6.QtCore import QThread, pyqtSignal
 class AThread(QThread):
     add_source = pyqtSignal()
 
-    def __init__(self, wiki_queue):
+    def __init__(self, wiki_queue, metrics_queue_1):
         super().__init__()
 
         # spacy.cli.download("en_core_web_sm")
         self.wikiGUIQueue = wiki_queue
-
+        self.metrics_queue_1 = metrics_queue_1
     def run(self):
-        NLP_handler(self.wikiGUIQueue, self.add_source)
+        NLP_handler(self.wikiGUIQueue, self.add_source, self.metrics_queue_1)
 
 
 def sample_from_mic(micSampleLength, audioSampleQueue, textSampleQueue):
@@ -63,7 +63,7 @@ def extract_proper_nouns(doc, usedWords):
             usedWords.append(' '.join([i.text for i in doc[current[0]:current[-1] + 1]]))
     return [doc[consecutive[0]:consecutive[-1] + 1] for consecutive in consecutives]
 
-def NLP_handler(wikiGUIQueue, signal_source):
+def NLP_handler(wikiGUIQueue, signal_source, metrics_queue_1):
     audioSampleQueue = queue.Queue()
     textSampleQueue = queue.Queue()
     wikiSearchQueue = queue.Queue()
@@ -74,7 +74,8 @@ def NLP_handler(wikiGUIQueue, signal_source):
     nlp = spacy.load("en_core_web_sm")
     thread = Thread(target=sample_from_mic, args=(micSampleLength, audioSampleQueue, textSampleQueue))
     thread.start()
-
+    totalWords = 0
+    totalProperNouns = 0
     custom_kw_extractor = yake.KeywordExtractor()
 
     while 1:
@@ -83,14 +84,20 @@ def NLP_handler(wikiGUIQueue, signal_source):
         text = textSampleQueue.get()
 
         doc = nlp(text)
+        totalWords += len(doc)
         keywords = custom_kw_extractor.extract_keywords(text)
         for k in keywords:
             if k[0] not in usedKeys:
                 usedKeys.append(k[0])
         extracted_proper_nouns = extract_proper_nouns(doc, usedWords)
+        totalProperNouns += len(extracted_proper_nouns)
+        metrics1 = [totalWords, totalProperNouns]
+        metrics_queue_1.put(metrics1)
+
         for noun in extracted_proper_nouns:
             wikiSearchQueue.put(noun.text)
 
-        WikiHandler.get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys)
-        signal_source.emit()
+        wikiThread = Thread(target=WikiHandler.get_first_wiki, args=(wikiSearchQueue, wikiGUIQueue, usedKeys, signal_source))
+        wikiThread.start()
+
 
