@@ -1,9 +1,13 @@
+import queue
+
 from PyQt6 import QtWidgets, uic
 from PyQt6.QtGui import QImage, QPixmap
 import WikiHandler
 import plotwidget
 import requests
 import StyleSheet
+from threading import Thread
+import NLPHandler
 from PyQt6.QtCore import pyqtSignal, QObject
 
 
@@ -66,6 +70,10 @@ def main():
     app = QtWidgets.QApplication([])
     app.setStyleSheet(StyleSheet.StyleSheet)
     window = MainWindowUI()
+    wikiGUIQueue = queue.Queue()
+    backgroundThread = Thread(target=NLPHandler.NLP_handler(window, wikiGUIQueue))
+    backgroundThread.start()
+    print("Did we get here???")
     window.show()
 
     #window.custom_signal.add_source.emit()
