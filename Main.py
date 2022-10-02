@@ -35,6 +35,8 @@ class SourceUI(QtWidgets.QWidget):
         super(SourceUI, self).__init__()
         uic.loadUi("SourceEntry.ui", self)
 
+        self.setFixedHeight(150)
+
         page, image_source = pair
 
         # Set Image if available

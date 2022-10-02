@@ -9,10 +9,16 @@ QFrame {
     border: 1px;
     border-radius: 10px;
 }
+
 QAbstractScrollArea {
     border: 10px solid white;
     border-radius: 10px;
 }
+
+QAbstractScrollArea#textBrowser {
+    border: 0px solid white;
+}
+
 QWidget#scrollAreaWidgetContents {
     background-color: #ffffff;
     border: 1px solid white;
