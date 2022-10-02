@@ -17,7 +17,7 @@ def get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys, language="en"):
         # gets the article titles related to term
 
         article_list = wikipedia.search(term)
-
+        print(article_list)
         # if the list is empty, might be misspelled.
         if len(article_list) == 0:
             article_list = wikipedia.suggest(term)
@@ -35,6 +35,7 @@ def get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys, language="en"):
 def find_best_match(title, usedKeys):
     try:
         # There might be many things named this still
+        print(title)
         wiki_page = wikipedia.page(title, auto_suggest=False)
     except wikipedia.DisambiguationError as e:
         # This is not great, could be a better suggestion mechanism
