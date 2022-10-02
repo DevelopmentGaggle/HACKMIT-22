@@ -1,15 +1,28 @@
 from PyQt6 import QtWidgets, uic
 from PyQt6.QtGui import QImage, QPixmap
 import WikiHandler
+import plotwidget
 import requests
 import StyleSheet
+from PyQt6.QtCore import pyqtSignal, QObject
+
+
+class Communicate(QObject):
+    add_source = pyqtSignal()
 
 
 class MainWindowUI(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindowUI, self).__init__()
         uic.loadUi("MainWindow.ui", self)
-        self.runButton.clicked.connect(self.print_button_pressed)
+        self.custom_signal = Communicate()
+        self.custom_signal.add_source.connect(self.print_button_pressed)
+
+        sc = plotwidget.MplCanvas(self, width=1, height=1, dpi=100)
+        sc.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
+
+        self.verticalLayout_2.addWidget(sc)
+        self.verticalLayout_2.addWidget(sc)
 
     def print_button_pressed(self):
         source_widget = SourceUI("Franklin")
@@ -54,6 +67,9 @@ def main():
     app.setStyleSheet(StyleSheet.StyleSheet)
     window = MainWindowUI()
     window.show()
+
+    #window.custom_signal.add_source.emit()
+
     app.exec()
 
 
