@@ -47,10 +47,15 @@ def find_best_match(title, usedKeys):
     except wikipedia.DisambiguationError as e:
         # This is not great, could be a better suggestion mechanism
         print("Disambiguation! Attempting to find most relevant article...")
+        print(e.options)
         custom_kw_extractor = yake.KeywordExtractor()
         counts = []
+        mostRelevant = 5
         for o in e.options:
-            keywords = custom_kw_extractor.extract_keywords(find_best_match(title, usedKeys).summary)
+            if mostRelevant == 0:
+                break;
+            mostRelevant = mostRelevant - 1
+            keywords = custom_kw_extractor.extract_keywords(find_best_match(o, usedKeys).summary)
             articleKeys = []
             for k in keywords:
                 if k[0] not in articleKeys:
@@ -60,8 +65,8 @@ def find_best_match(title, usedKeys):
                 if phrase in articleKeys:
                     cnt = cnt + 1
             counts.append(cnt)
-            max = counts[0]
-            opt = 0
+        max = counts[0]
+        opt = 0
         for num in range(1, len(counts)):
             if max < counts[num]:
                 max = counts[num]
