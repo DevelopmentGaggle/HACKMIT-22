@@ -11,14 +11,16 @@ from PyQt6.QtCore import QThread, pyqtSignal
 class AThread(QThread):
     add_source = pyqtSignal()
 
-    def __init__(self, wiki_queue, metrics_queue_1):
+    def __init__(self, wiki_queue, metrics_queue_1, metrics_queue_2):
         super().__init__()
 
         # spacy.cli.download("en_core_web_sm")
         self.wikiGUIQueue = wiki_queue
         self.metrics_queue_1 = metrics_queue_1
+        self.metrics_queue_2 = metrics_queue_2
+
     def run(self):
-        NLP_handler(self.wikiGUIQueue, self.add_source, self.metrics_queue_1)
+        NLP_handler(self.wikiGUIQueue, self.add_source, self.metrics_queue_1, self.metrics_queue_1)
 
 
 def sample_from_mic(micSampleLength, audioSampleQueue, textSampleQueue):
@@ -63,7 +65,7 @@ def extract_proper_nouns(doc, usedWords):
             usedWords.append(' '.join([i.text for i in doc[current[0]:current[-1] + 1]]))
     return [doc[consecutive[0]:consecutive[-1] + 1] for consecutive in consecutives]
 
-def NLP_handler(wikiGUIQueue, signal_source, metrics_queue_1):
+def NLP_handler(wikiGUIQueue, signal_source, metrics_queue_1, metrics_queue_2):
     audioSampleQueue = queue.Queue()
     textSampleQueue = queue.Queue()
     wikiSearchQueue = queue.Queue()
@@ -86,6 +88,11 @@ def NLP_handler(wikiGUIQueue, signal_source, metrics_queue_1):
         doc = nlp(text)
         totalWords += len(doc)
         keywords = custom_kw_extractor.extract_keywords(text)
+        sorted(keywords, key=lambda x: x[1], reverse=True)
+        for index in range(keywords):
+            if index > 3:
+                break
+            metrics_queue_2.put(keywords[index].text())
         for k in keywords:
             if k[0] not in usedKeys:
                 usedKeys.append(k[0])
