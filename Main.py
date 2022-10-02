@@ -8,7 +8,8 @@ import requests
 import StyleSheet
 from threading import Thread
 import NLPHandler
-from PyQt6.QtCore import pyqtSignal, QObject
+import random
+from PyQt6.QtCore import Qt, QTimer
 
 
 class MainWindowUI(QtWidgets.QMainWindow):
@@ -18,11 +19,44 @@ class MainWindowUI(QtWidgets.QMainWindow):
 
         self.wiki_queue = wiki_queue
 
-        sc = plotwidget.MplCanvas(self, width=1, height=1, dpi=100)
-        sc.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
+        self.verticalLayout.addStretch()
 
-        self.verticalLayout_2.addWidget(sc)
-        self.verticalLayout_2.addWidget(sc)
+        self.canvas1 = plotwidget.MplCanvas(self, width=5, height=5, dpi=100)
+        self.canvas1.setMinimumWidth(325)
+        self.canvas1.setMinimumHeight(200)
+        self.canvas2 = plotwidget.MplCanvas(self, width=5, height=5, dpi=100)
+        self.canvas2.setMinimumWidth(325)
+        self.canvas2.setMinimumHeight(200)
+
+        self.verticalLayout_2.addWidget(self.canvas1)
+        self.verticalLayout_2.addWidget(self.canvas2)
+        self.verticalLayout_2.addStretch()
+
+
+        n_data = 50
+        self.xdata = list(range(n_data))
+        self.ydata = [random.randint(0, 10) for i in range(n_data)]
+        self.update_plot()
+
+        self.show()
+
+        # Setup a timer to trigger the redraw by calling update_plot.
+        self.timer = QTimer()
+        self.timer.setInterval(100)
+        self.timer.timeout.connect(self.update_plot)
+        self.timer.start()
+
+    def update_plot(self):
+        # Drop off the first y element, append a new one.
+        self.ydata = self.ydata[1:] + [random.randint(0, 10)]
+        self.canvas1.axes.cla()  # Clear the canvas.
+        self.canvas1.axes.plot(self.xdata, self.ydata, 'r')
+        # Trigger the canvas to update and redraw.
+        self.canvas1.draw()
+        self.canvas2.axes.cla()  # Clear the canvas.
+        self.canvas2.axes.plot(self.xdata, self.ydata, 'r')
+        # Trigger the canvas to update and redraw.
+        self.canvas2.draw()
 
     def print_button_pressed(self):
         while not self.wiki_queue.empty():
@@ -47,7 +81,7 @@ class SourceUI(QtWidgets.QWidget):
             pixmap = QPixmap(image)
 
             # this value will need to coordinate with the ui file
-            pixmap = pixmap.scaledToHeight(64)
+            pixmap = pixmap.scaledToHeight(64, mode=Qt.TransformationMode.SmoothTransformation)
 
             self.label.setText("")
             self.label.setPixmap(pixmap)
