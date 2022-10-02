@@ -18,7 +18,7 @@ class MainWindowUI(QtWidgets.QMainWindow):
         uic.loadUi("MainWindow.ui", self)
         self.setWindowTitle("Application Name")
 
-        self.total = 50
+        self.total = 5
         self.ydata = []
         self.xdata = []
 
@@ -40,6 +40,8 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.verticalLayout_2.addWidget(self.canvas2)
         self.verticalLayout_2.addStretch()
 
+
+
         # Setup a timer to trigger the redraw by calling update_plot.
         self.timer = QTimer()
         self.timer.setInterval(100)
@@ -57,8 +59,9 @@ class MainWindowUI(QtWidgets.QMainWindow):
         print(important_words)
 
         if len(self.ydata) + 1 > self.total:
+            # TODO PLEASE WORK
             self.ydata = self.ydata[1:] + [important_words / total_words]
-            self.xdata = self.xdata[1:] + self.xdata[self.total-1]
+            self.xdata = [self.xdata[self.total-1]] + self.xdata[1:]
         else:
             self.ydata = self.ydata + [important_words / total_words]
             self.xdata = self.xdata + [len(self.ydata)]
@@ -82,7 +85,7 @@ class SourceUI(QtWidgets.QWidget):
         super(SourceUI, self).__init__()
         uic.loadUi("SourceEntry.ui", self)
 
-        height = 90
+        height = 150
 
         self.setFixedHeight(height)
 

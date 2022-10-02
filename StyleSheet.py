@@ -5,6 +5,10 @@ QPushButton {
     font-weight: bold;
 }
 
+QFrame:frame_line {
+    background-color: #eeeeee;
+    border: 1px solid white;
+}
 
 QAbstractScrollArea {
     border: 10px solid white;
