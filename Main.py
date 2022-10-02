@@ -1,7 +1,7 @@
 import queue
 from wordcloud import WordCloud
 from PyQt6 import QtWidgets, uic
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QImage, QPixmap, QIcon
 import WikiHandler
 import plotwidget
 import requests
@@ -16,9 +16,9 @@ class MainWindowUI(QtWidgets.QMainWindow):
     def __init__(self, wiki_queue, metrics_queue_1, metrics_queue_2):
         super(MainWindowUI, self).__init__()
         uic.loadUi("MainWindow.ui", self)
-        self.setWindowTitle("Application Name")
+        self.setWindowTitle("Essence")
 
-        self.total = 5
+        self.total = 50
         self.ydata = []
         self.xdata = []
 
@@ -145,6 +145,7 @@ def main():
     thread.start()
 
     window.resize(1100, 700)
+    window.setWindowIcon(QIcon('logo.png'))
     window.show()
     app.exec()
 
