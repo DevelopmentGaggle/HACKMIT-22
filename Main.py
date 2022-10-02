@@ -10,7 +10,7 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.pushButton.clicked.connect(self.print_button_pressed)
 
     def print_button_pressed(self):
-        source_widget = SourceUI("Franklin")
+        source_widget = SourceUI("Ford")
         self.verticalLayout.addWidget(source_widget)
 
 

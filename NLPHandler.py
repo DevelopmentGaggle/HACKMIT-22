@@ -1,5 +1,5 @@
 import queue
-
+import yake
 import spacy
 from threading import Thread
 import time
@@ -25,7 +25,6 @@ def audio_to_text(r, audioSampleQueue, textSampleQueue):
     audio_data = audioSampleQueue.get()
     try:
         textFromSpeech = r.recognize_google(audio_data)
-        print(textFromSpeech)
         textSampleQueue.put(textFromSpeech)
     except sr.UnknownValueError:
         print("Got nothing for you chief")
@@ -42,16 +41,13 @@ def extract_proper_nouns(doc, usedWords):
             if current[-1] == elt - 1:
                 current.append(elt)
             else:
-                print(current)
                 if (' '.join([i.text for i in doc[current[0]:current[-1]+1]])) not in usedWords:
                     consecutives.append(current)
-                    print(usedWords)
                     usedWords.append(' '.join([i.text for i in doc[current[0]:current[-1]+1]]))
                 current = [elt]
     if len(current) != 0:
         if (' '.join([i.text for i in doc[current[0]:current[-1] + 1]])) not in usedWords:
             consecutives.append(current)
-            print(usedWords)
             usedWords.append(' '.join([i.text for i in doc[current[0]:current[-1] + 1]]))
     return [doc[consecutive[0]:consecutive[-1] + 1] for consecutive in consecutives]
 
@@ -59,12 +55,15 @@ def extract_proper_nouns(doc, usedWords):
 audioSampleQueue = queue.Queue()
 textSampleQueue = queue.Queue()
 usedWords = []
+usedKeys = []
 
 
 micSampleLength = 10
 nlp = spacy.load("en_core_web_sm")
 thread = Thread(target=sample_from_mic, args=(micSampleLength, audioSampleQueue, textSampleQueue))
 thread.start()
+
+custom_kw_extractor = yake.KeywordExtractor()
 
 while 1:
     while textSampleQueue.empty():
@@ -82,10 +81,12 @@ while 1:
     nor meddle in the internal affairs of European countries."""
 
     doc = nlp(text)
+    keywords = custom_kw_extractor.extract_keywords(text)
+    for k in keywords:
+        if k[0] not in usedKeys:
+            usedKeys.append(k[0])
+    print(usedKeys)
 
-    #for tok in doc:
-    #    print(tok, tok.pos_)
-
-    dog = extract_proper_nouns(doc, usedWords)
-    print(dog)
+    extractedProperNouns = extract_proper_nouns(doc, usedWords)
+    #print(extractedProperNouns)
 
