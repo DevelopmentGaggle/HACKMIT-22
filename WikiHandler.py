@@ -5,7 +5,7 @@ import yake
 from bing_image_urls import bing_image_urls
 
 
-def get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys, language="en"):
+def get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys, signal_source, language="en"):
     if language in wikipedia.languages():
         wikipedia.set_lang(language)
     else:
@@ -37,7 +37,7 @@ def get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys, language="en"):
             page_image = ""
 
         wikiGUIQueue.put([wiki_page, page_image])
-
+        signal_source.emit()
 
 def find_best_match(title, usedKeys):
     try:

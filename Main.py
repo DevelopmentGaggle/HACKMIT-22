@@ -24,6 +24,7 @@ class MainWindowUI(QtWidgets.QMainWindow):
 
         self.wiki_queue = wiki_queue
         self.metrics_queue_1 = metrics_queue_1
+        self.usedWikis = []
 
         # Add graph widgets to the left and a spacer to the right
         self.verticalLayout.addStretch()
@@ -69,9 +70,11 @@ class MainWindowUI(QtWidgets.QMainWindow):
 
     def print_button_pressed(self):
         while not self.wiki_queue.empty():
-            source_widget = SourceUI(self.wiki_queue.get())
-            source_widget.setStyleSheet()
-            self.verticalLayout.insertWidget(0, source_widget)
+            wikiData = self.wiki_queue.get()
+            if wikiData[0] not in self.usedWikis:
+                self.usedWikis.append(wikiData[0])
+                source_widget = SourceUI(wikiData)
+                self.verticalLayout.insertWidget(0, source_widget)
 
 
 class SourceUI(QtWidgets.QWidget):
