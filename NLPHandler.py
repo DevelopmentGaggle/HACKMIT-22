@@ -11,11 +11,11 @@ from PyQt6.QtCore import QThread, pyqtSignal
 class AThread(QThread):
     add_source = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, wiki_queue):
         super().__init__()
 
         # spacy.cli.download("en_core_web_sm")
-        self.wikiGUIQueue = queue.Queue()
+        self.wikiGUIQueue = wiki_queue
 
     def run(self):
         NLP_handler(self.wikiGUIQueue, self.add_source)

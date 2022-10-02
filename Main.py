@@ -12,9 +12,11 @@ from PyQt6.QtCore import pyqtSignal, QObject
 
 
 class MainWindowUI(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, wiki_queue):
         super(MainWindowUI, self).__init__()
         uic.loadUi("MainWindow.ui", self)
+
+        self.wiki_queue = wiki_queue
 
         sc = plotwidget.MplCanvas(self, width=1, height=1, dpi=100)
         sc.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
@@ -23,16 +25,17 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.verticalLayout_2.addWidget(sc)
 
     def print_button_pressed(self):
-        source_widget = SourceUI("Franklin")
-        self.verticalLayout.addWidget(source_widget)
+        while not self.wiki_queue.empty():
+            source_widget = SourceUI(self.wiki_queue.get())
+            self.verticalLayout.addWidget(source_widget)
 
 
 class SourceUI(QtWidgets.QWidget):
-    def __init__(self, term, language='en'):
+    def __init__(self, pair, language='en'):
         super(SourceUI, self).__init__()
         uic.loadUi("SourceEntry.ui", self)
 
-        page, image_source = WikiHandler.get_first_wiki(term, language)
+        page, image_source = pair
 
         # Set Image if available
         if len(image_source) > 0:
@@ -63,9 +66,12 @@ def main():
 
     app = QtWidgets.QApplication([])
     app.setStyleSheet(StyleSheet.StyleSheet)
-    window = MainWindowUI()
 
-    thread = NLPHandler.AThread()
+    wiki_queue = queue.Queue()
+
+    window = MainWindowUI(wiki_queue)
+    thread = NLPHandler.AThread(wiki_queue)
+
     thread.add_source.connect(window.print_button_pressed)
     thread.start()
 
