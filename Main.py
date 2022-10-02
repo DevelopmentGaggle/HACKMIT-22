@@ -53,7 +53,8 @@ class MainWindowUI(QtWidgets.QMainWindow):
         if self.metrics_queue_1.empty():
             return
 
-        total_words, important_words = self.metrics_queue_1.get()
+        tmp = self.metrics_queue_1.get()
+        total_words, important_words = tmp
 
         print(total_words)
         print(important_words)
@@ -122,9 +123,10 @@ def main():
 
     wiki_queue = queue.Queue()
     metrics_queue_1 = queue.Queue()
+    metrics_queue_2 = queue.Queue()
 
     window = MainWindowUI(wiki_queue, metrics_queue_1)
-    thread = NLPHandler.AThread(wiki_queue, metrics_queue_1)
+    thread = NLPHandler.AThread(wiki_queue, metrics_queue_1, metrics_queue_2)
 
     thread.add_source.connect(window.print_button_pressed)
     thread.start()

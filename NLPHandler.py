@@ -20,7 +20,7 @@ class AThread(QThread):
         self.metrics_queue_2 = metrics_queue_2
 
     def run(self):
-        NLP_handler(self.wikiGUIQueue, self.add_source, self.metrics_queue_1, self.metrics_queue_1)
+        NLP_handler(self.wikiGUIQueue, self.add_source, self.metrics_queue_1, self.metrics_queue_2)
 
 
 def sample_from_mic(micSampleLength, audioSampleQueue, textSampleQueue):
@@ -89,10 +89,10 @@ def NLP_handler(wikiGUIQueue, signal_source, metrics_queue_1, metrics_queue_2):
         totalWords += len(doc)
         keywords = custom_kw_extractor.extract_keywords(text)
         sorted(keywords, key=lambda x: x[1], reverse=True)
-        for index in range(keywords):
+        for index in range(len(keywords)):
             if index > 3:
                 break
-            metrics_queue_2.put(keywords[index].text())
+            metrics_queue_2.put(keywords[index][0])
         for k in keywords:
             if k[0] not in usedKeys:
                 usedKeys.append(k[0])
