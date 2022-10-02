@@ -5,8 +5,21 @@ from threading import Thread
 import time
 import WikiHandler
 import speech_recognition as sr
+from PyQt6.QtCore import QThread, pyqtSignal
 
-#spacy.cli.download("en_core_web_sm")
+
+class AThread(QThread):
+    add_source = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+
+        # spacy.cli.download("en_core_web_sm")
+        self.wikiGUIQueue = queue.Queue()
+
+    def run(self):
+        NLP_handler(self.wikiGUIQueue, self.add_source)
+
 
 def sample_from_mic(micSampleLength, audioSampleQueue, textSampleQueue):
     r = sr.Recognizer()
@@ -50,7 +63,7 @@ def extract_proper_nouns(doc, usedWords):
             usedWords.append(' '.join([i.text for i in doc[current[0]:current[-1] + 1]]))
     return [doc[consecutive[0]:consecutive[-1] + 1] for consecutive in consecutives]
 
-def NLP_handler(window, wikiGUIQueue):
+def NLP_handler(wikiGUIQueue, signal_source):
     audioSampleQueue = queue.Queue()
     textSampleQueue = queue.Queue()
     wikiSearchQueue = queue.Queue()
@@ -78,6 +91,6 @@ def NLP_handler(window, wikiGUIQueue):
         for noun in extracted_proper_nouns:
             wikiSearchQueue.put(noun.text)
 
-        WikiHandler.get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys, window)
-
+        WikiHandler.get_first_wiki(wikiSearchQueue, wikiGUIQueue, usedKeys)
+        signal_source.emit()
 

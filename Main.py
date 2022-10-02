@@ -11,16 +11,10 @@ import NLPHandler
 from PyQt6.QtCore import pyqtSignal, QObject
 
 
-class Communicate(QObject):
-    add_source = pyqtSignal()
-
-
 class MainWindowUI(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindowUI, self).__init__()
         uic.loadUi("MainWindow.ui", self)
-        self.custom_signal = Communicate()
-        self.custom_signal.add_source.connect(self.print_button_pressed)
 
         sc = plotwidget.MplCanvas(self, width=1, height=1, dpi=100)
         sc.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
@@ -70,9 +64,11 @@ def main():
     app = QtWidgets.QApplication([])
     app.setStyleSheet(StyleSheet.StyleSheet)
     window = MainWindowUI()
-    wikiGUIQueue = queue.Queue()
-    backgroundThread = Thread(target=NLPHandler.NLP_handler(window, wikiGUIQueue))
-    backgroundThread.start()
+
+    thread = NLPHandler.AThread()
+    thread.add_source.connect(window.print_button_pressed)
+    thread.start()
+
     print("Did we get here???")
     window.show()
 
